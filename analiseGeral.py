@@ -1,12 +1,15 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import streamlit.components.v1 as components
 
+# --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Dashboard HVI", layout="wide", page_icon="🌱")
 st.title("Análise de Qualidade do Algodão (HVI) 🌱")
 st.markdown("Acompanhamento de safra: Variedade, Tipo Visual e Índices de Qualidade.")
 
 
+# --- INGESTÃO E LIMPEZA DE DADOS AUTOMÁTICA ---
 @st.cache_data
 def carregar_dados():
     df = pd.read_excel('RetornoHVI_Geral.xlsx')
@@ -30,6 +33,7 @@ def carregar_dados():
 
     return df
 
+
 try:
     df = carregar_dados()
 except Exception as e:
@@ -44,6 +48,7 @@ aba1, aba2, aba3, aba4 = st.tabs([
     "⚖️ 4. Comparador de Perfis"
 ])
 
+# ABA 1 - Gráfico de Pizza
 with aba1:
     st.subheader("Proporção Total de Fardos por Variedade")
     contagem_var = df['Variedade'].value_counts().reset_index()
@@ -53,71 +58,75 @@ with aba1:
     fig_pizza.update_traces(textposition='inside', textinfo='percent+label')
     st.plotly_chart(fig_pizza, use_container_width=True)
 
-# # ABA 2 - Produção Detalhada (Matriz Estilo Excel com CSS Isolado)
-# with aba2:
-#     st.subheader("Resumo Geral: Produção por Tipo Visual (Tp.V.) e Fibra (UN)")
-#
-#     variedade_filtro = st.selectbox("Selecione a Variedade que deseja analisar:", df['Variedade'].unique())
-#     df_filtrado = df[df['Variedade'] == variedade_filtro]
-#
-#     if not df_filtrado.empty:
-#         tabela_matriz = pd.crosstab(
-#             index=df_filtrado['Tp.V.'],
-#             columns=df_filtrado['UN'],
-#             margins=True,
-#             margins_name='TOTAL TIPO'
-#         )
-#
-#         tabela_matriz = tabela_matriz.loc[:, (tabela_matriz != 0).any(axis=0)]
-#         tabela_matriz = tabela_matriz.replace(0, "")
-#         tabela_matriz.columns = [f"FIBRA {c}" if c != 'TOTAL TIPO' else c for c in tabela_matriz.columns]
-#         tabela_matriz.index.name = "TIPO"
-#
-#         html_tabela = tabela_matriz.to_html(classes="tabela-excel", border=0)
-#
-#         css = """
-#         <style>
-#             .tabela-excel {
-#                 border-collapse: collapse;
-#                 font-family: Arial, sans-serif;
-#                 font-size: 14px;
-#                 width: 100%;
-#                 color: black;
-#                 background-color: white;
-#             }
-#             .tabela-excel th, .tabela-excel td {
-#                 border: 1px solid #7f8c8d;
-#                 padding: 8px;
-#                 text-align: center;
-#             }
-#             /* Cor do cabeçalho superior (Fibras) */
-#             .tabela-excel thead th {
-#                 background-color: #b2ebf2;
-#             }
-#             /* Cor da primeira coluna (TIPO) */
-#             .tabela-excel tbody th {
-#                 background-color: #e0f7fa;
-#             }
-#             /* Cor da coluna TOTAL TIPO */
-#             .tabela-excel td:last-child, .tabela-excel th:last-child {
-#                 background-color: #4dd0e1;
-#                 font-weight: bold;
-#             }
-#             /* Cor da última linha (Total Geral) */
-#             .tabela-excel tbody tr:last-child th,
-#             .tabela-excel tbody tr:last-child td {
-#                 background-color: #80deea;
-#                 font-weight: bold;
-#             }
-#         </style>
-#         """
-#
-#         # O SEGREDO ESTÁ AQUI: Roda o HTML puro de forma isolada e com scroll
-#         components.html(css + html_tabela, height=500, scrolling=True)
-#
-#     else:
-#         st.info("Nenhum dado encontrado para esta variedade.")
+# ABA 2 - Produção Detalhada (Matriz Estilo Excel)
+with aba2:
+    st.subheader("Resumo Geral: Produção por Tipo Visual (Tp.V.) e Fibra (UN)")
 
+    variedade_filtro = st.selectbox("Selecione a Variedade que deseja analisar:", df['Variedade'].unique())
+    df_filtrado = df[df['Variedade'] == variedade_filtro]
+
+    if not df_filtrado.empty:
+        tabela_matriz = pd.crosstab(
+            index=df_filtrado['Tp.V.'],
+            columns=df_filtrado['UN'],
+            margins=True,
+            margins_name='TOTAL TIPO'
+        )
+
+        tabela_matriz = tabela_matriz.loc[:, (tabela_matriz != 0).any(axis=0)]
+        tabela_matriz = tabela_matriz.replace(0, "")
+        tabela_matriz.columns = [f"FIBRA {c}" if c != 'TOTAL TIPO' else c for c in tabela_matriz.columns]
+        tabela_matriz.index.name = "TIPO"
+
+        # HTML blindado com suporte a scroll no celular
+        html_completo = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: transparent;
+                margin: 0;
+                padding: 0;
+            }}
+            .container {{
+                overflow-x: auto;
+                width: 100%;
+            }}
+            .tabela-excel {{
+                border-collapse: collapse;
+                font-size: 14px;
+                width: 100%;
+                color: black;
+                background-color: white;
+            }}
+            .tabela-excel th, .tabela-excel td {{
+                border: 1px solid #7f8c8d;
+                padding: 8px;
+                text-align: center;
+                min-width: 45px;
+            }}
+            .tabela-excel thead th {{ background-color: #b2ebf2; }}
+            .tabela-excel tbody th {{ background-color: #e0f7fa; }}
+            .tabela-excel td:last-child, .tabela-excel th:last-child {{ background-color: #4dd0e1; font-weight: bold; }}
+            .tabela-excel tbody tr:last-child th, .tabela-excel tbody tr:last-child td {{ background-color: #80deea; font-weight: bold; }}
+        </style>
+        </head>
+        <body>
+            <div class="container">
+                {tabela_matriz.to_html(classes="tabela-excel", border=0)}
+            </div>
+        </body>
+        </html>
+        """
+
+        components.html(html_completo, height=600, scrolling=True)
+    else:
+        st.info("Nenhum dado encontrado para esta variedade.")
+
+# ABA 3 - Alertas de Qualidade
 with aba3:
     st.subheader("Monitoramento de Amostras Fora do Padrão")
     col1, col2 = st.columns(2)
@@ -142,6 +151,7 @@ with aba3:
         else:
             st.success("Tudo certo! Nenhuma amostra com baixa resistência.")
 
+# ABA 4 - Comparador Direto por Tipo Visual
 with aba4:
     st.subheader("Batalha de Variedades por Tipo Visual")
     st.markdown("Selecione um Tipo Visual para comparar o comprimento de fibra (UN) de cada variedade.")
