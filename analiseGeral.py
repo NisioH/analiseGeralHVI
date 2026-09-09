@@ -2,13 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Dashboard HVI", layout="wide", page_icon="🌱")
 st.title("Análise de Qualidade do Algodão (HVI) 🌱")
 st.markdown("Acompanhamento de safra: Variedade, Tipo Visual e Índices de Qualidade.")
 
 
-# --- INGESTÃO E LIMPEZA DE DADOS AUTOMÁTICA ---
 @st.cache_data
 def carregar_dados():
     df = pd.read_excel('RetornoHVI_Geral.xlsx')
@@ -32,7 +30,6 @@ def carregar_dados():
 
     return df
 
-
 try:
     df = carregar_dados()
 except Exception as e:
@@ -47,7 +44,6 @@ aba1, aba2, aba3, aba4 = st.tabs([
     "⚖️ 4. Comparador de Perfis"
 ])
 
-# ABA 1 - Gráfico de Pizza
 with aba1:
     st.subheader("Proporção Total de Fardos por Variedade")
     contagem_var = df['Variedade'].value_counts().reset_index()
@@ -57,7 +53,6 @@ with aba1:
     fig_pizza.update_traces(textposition='inside', textinfo='percent+label')
     st.plotly_chart(fig_pizza, use_container_width=True)
 
-# ABA 2 - Produção Detalhada (Matriz Estilo Excel)
 with aba2:
     st.subheader("Resumo Geral: Produção por Tipo Visual (Tp.V.) e Fibra (UN)")
 
@@ -80,43 +75,60 @@ with aba2:
         html_tabela = tabela_matriz.to_html(classes="tabela-excel", border=0)
 
         css = """
-        <style>
-            .tabela-excel {
-                border-collapse: collapse;
-                font-family: Arial, sans-serif;
-                font-size: 13px;
-                width: 100%;
-                max-width: 950px;
-                color: black !important;
-                background-color: white !important;
-            }
-            .tabela-excel th, .tabela-excel td {
-                border: 1px solid #7f8c8d !important;
-                padding: 6px !important;
-                text-align: center !important;
-            }
-            .tabela-excel thead th {
-                background-color: #b2ebf2 !important; 
-            }
-            .tabela-excel tbody th {
-                background-color: #e0f7fa !important;
-            }
-            .tabela-excel td:last-child, .tabela-excel th:last-child {
-                background-color: #4dd0e1 !important; 
-                font-weight: bold;
-            }
-            .tabela-excel tbody tr:last-child th, 
-            .tabela-excel tbody tr:last-child td {
-                background-color: #80deea !important;
-                font-weight: bold;
-            }
-        </style>
-        """
+                <style>
+                    .tabela-excel {
+                        border-collapse: collapse;
+                        font-family: Arial, sans-serif;
+                        font-size: 13px;
+                        width: 100%;
+                        max-width: 950px;
+                        color: black !important;
+                        background-color: white !important;
+                    }
+                    .tabela-excel th, .tabela-excel td {
+                        border: 1px solid #7f8c8d !important;
+                        padding: 6px !important;
+                        text-align: center !important;
+                    }
+                    .tabela-excel thead th {
+                        background-color: #b2ebf2 !important; 
+                    }
+                    .tabela-excel tbody th {
+                        background-color: #e0f7fa !important;
+                    }
+                    .tabela-excel td:last-child, .tabela-excel th:last-child {
+                        background-color: #4dd0e1 !important; 
+                        font-weight: bold;
+                    }
+                    .tabela-excel tbody tr:last-child th, 
+                    .tabela-excel tbody tr:last-child td {
+                        background-color: #80deea !important;
+                        font-weight: bold;
+                    }
+
+                    @media (max-width: 768px) {
+                        .tabela-excel {
+                            font-size: 10px; /* Reduz a fonte para caber na tela */
+                        }
+                        .tabela-excel th, .tabela-excel td {
+                            padding: 3px !important; /* Diminui o espaçamento interno das células */
+                            min-width: auto;
+                        }
+                        /* Força a barra de rolagem a ser mais visível no celular */
+                        ::-webkit-scrollbar {
+                            height: 6px;
+                        }
+                        ::-webkit-scrollbar-thumb {
+                            background: #888; 
+                            border-radius: 3px;
+                        }
+                    }
+                </style>
+                """
         st.markdown(f'<div style="overflow-x: auto;">{css}{html_tabela}</div>', unsafe_allow_html=True)
     else:
         st.info("Nenhum dado encontrado para esta variedade.")
 
-# ABA 3 - Alertas de Qualidade
 with aba3:
     st.subheader("Monitoramento de Amostras Fora do Padrão")
     col1, col2 = st.columns(2)
@@ -141,7 +153,6 @@ with aba3:
         else:
             st.success("Tudo certo! Nenhuma amostra com baixa resistência.")
 
-# ABA 4 - Comparador Direto por Tipo Visual
 with aba4:
     st.subheader("Batalha de Variedades por Tipo Visual")
     st.markdown("Selecione um Tipo Visual para comparar o comprimento de fibra (UN) de cada variedade.")
