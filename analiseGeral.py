@@ -53,81 +53,70 @@ with aba1:
     fig_pizza.update_traces(textposition='inside', textinfo='percent+label')
     st.plotly_chart(fig_pizza, use_container_width=True)
 
-with aba2:
-    st.subheader("Resumo Geral: Produção por Tipo Visual (Tp.V.) e Fibra (UN)")
-
-    variedade_filtro = st.selectbox("Selecione a Variedade que deseja analisar:", df['Variedade'].unique())
-    df_filtrado = df[df['Variedade'] == variedade_filtro]
-
-    if not df_filtrado.empty:
-        tabela_matriz = pd.crosstab(
-            index=df_filtrado['Tp.V.'],
-            columns=df_filtrado['UN'],
-            margins=True,
-            margins_name='TOTAL TIPO'
-        )
-
-        tabela_matriz = tabela_matriz.loc[:, (tabela_matriz != 0).any(axis=0)]
-        tabela_matriz = tabela_matriz.replace(0, "")
-        tabela_matriz.columns = [f"FIBRA {c}" if c != 'TOTAL TIPO' else c for c in tabela_matriz.columns]
-        tabela_matriz.index.name = "TIPO"
-
-        html_tabela = tabela_matriz.to_html(classes="tabela-excel", border=0)
-
-        css = """
-                <style>
-                    .tabela-excel {
-                        border-collapse: collapse;
-                        font-family: Arial, sans-serif;
-                        font-size: 13px;
-                        width: 100%;
-                        max-width: 950px;
-                        color: black !important;
-                        background-color: white !important;
-                    }
-                    .tabela-excel th, .tabela-excel td {
-                        border: 1px solid #7f8c8d !important;
-                        padding: 6px !important;
-                        text-align: center !important;
-                    }
-                    .tabela-excel thead th {
-                        background-color: #b2ebf2 !important; 
-                    }
-                    .tabela-excel tbody th {
-                        background-color: #e0f7fa !important;
-                    }
-                    .tabela-excel td:last-child, .tabela-excel th:last-child {
-                        background-color: #4dd0e1 !important; 
-                        font-weight: bold;
-                    }
-                    .tabela-excel tbody tr:last-child th, 
-                    .tabela-excel tbody tr:last-child td {
-                        background-color: #80deea !important;
-                        font-weight: bold;
-                    }
-
-                    @media (max-width: 768px) {
-                        .tabela-excel {
-                            font-size: 10px; /* Reduz a fonte para caber na tela */
-                        }
-                        .tabela-excel th, .tabela-excel td {
-                            padding: 3px !important; /* Diminui o espaçamento interno das células */
-                            min-width: auto;
-                        }
-                        /* Força a barra de rolagem a ser mais visível no celular */
-                        ::-webkit-scrollbar {
-                            height: 6px;
-                        }
-                        ::-webkit-scrollbar-thumb {
-                            background: #888; 
-                            border-radius: 3px;
-                        }
-                    }
-                </style>
-                """
-        st.markdown(f'<div style="overflow-x: auto;">{css}{html_tabela}</div>', unsafe_allow_html=True)
-    else:
-        st.info("Nenhum dado encontrado para esta variedade.")
+# # ABA 2 - Produção Detalhada (Matriz Estilo Excel com CSS Isolado)
+# with aba2:
+#     st.subheader("Resumo Geral: Produção por Tipo Visual (Tp.V.) e Fibra (UN)")
+#
+#     variedade_filtro = st.selectbox("Selecione a Variedade que deseja analisar:", df['Variedade'].unique())
+#     df_filtrado = df[df['Variedade'] == variedade_filtro]
+#
+#     if not df_filtrado.empty:
+#         tabela_matriz = pd.crosstab(
+#             index=df_filtrado['Tp.V.'],
+#             columns=df_filtrado['UN'],
+#             margins=True,
+#             margins_name='TOTAL TIPO'
+#         )
+#
+#         tabela_matriz = tabela_matriz.loc[:, (tabela_matriz != 0).any(axis=0)]
+#         tabela_matriz = tabela_matriz.replace(0, "")
+#         tabela_matriz.columns = [f"FIBRA {c}" if c != 'TOTAL TIPO' else c for c in tabela_matriz.columns]
+#         tabela_matriz.index.name = "TIPO"
+#
+#         html_tabela = tabela_matriz.to_html(classes="tabela-excel", border=0)
+#
+#         css = """
+#         <style>
+#             .tabela-excel {
+#                 border-collapse: collapse;
+#                 font-family: Arial, sans-serif;
+#                 font-size: 14px;
+#                 width: 100%;
+#                 color: black;
+#                 background-color: white;
+#             }
+#             .tabela-excel th, .tabela-excel td {
+#                 border: 1px solid #7f8c8d;
+#                 padding: 8px;
+#                 text-align: center;
+#             }
+#             /* Cor do cabeçalho superior (Fibras) */
+#             .tabela-excel thead th {
+#                 background-color: #b2ebf2;
+#             }
+#             /* Cor da primeira coluna (TIPO) */
+#             .tabela-excel tbody th {
+#                 background-color: #e0f7fa;
+#             }
+#             /* Cor da coluna TOTAL TIPO */
+#             .tabela-excel td:last-child, .tabela-excel th:last-child {
+#                 background-color: #4dd0e1;
+#                 font-weight: bold;
+#             }
+#             /* Cor da última linha (Total Geral) */
+#             .tabela-excel tbody tr:last-child th,
+#             .tabela-excel tbody tr:last-child td {
+#                 background-color: #80deea;
+#                 font-weight: bold;
+#             }
+#         </style>
+#         """
+#
+#         # O SEGREDO ESTÁ AQUI: Roda o HTML puro de forma isolada e com scroll
+#         components.html(css + html_tabela, height=500, scrolling=True)
+#
+#     else:
+#         st.info("Nenhum dado encontrado para esta variedade.")
 
 with aba3:
     st.subheader("Monitoramento de Amostras Fora do Padrão")
