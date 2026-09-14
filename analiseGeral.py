@@ -10,7 +10,7 @@ st.markdown("Acompanhamento de safra: Variedade, Tipo Visual e Índices de Quali
 
 
 # --- INGESTÃO E LIMPEZA DE DADOS AUTOMÁTICA ---
-@st.cache_data
+@st.cache_data(ttl=600)
 def carregar_dados():
     df = pd.read_excel('RetornoHVI_Geral1.xlsx')
 
